@@ -22,3 +22,4 @@ config.yml
 
 artifacts
 config/tests/config4.yml
+config/tests/config_local.yml
