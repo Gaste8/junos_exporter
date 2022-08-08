@@ -133,15 +133,13 @@ func (*bgpCollector) collectRIBForPeer(p BGPPeer, ch chan<- prometheus.Metric, l
 		rib_name = p.CFG_RTI + "." + rib_name
 	}
 
-	l := append(labelValues, rib_name)
-
 	for _, rib := range p.RIBs {
+		l := append(labelValues, rib.Name)
 		ch <- prometheus.MustNewConstMetric(receivedPrefixesDesc, prometheus.GaugeValue, float64(rib.ReceivedPrefixes), l...)
 		ch <- prometheus.MustNewConstMetric(acceptedPrefixesDesc, prometheus.GaugeValue, float64(rib.AcceptedPrefixes), l...)
 		ch <- prometheus.MustNewConstMetric(rejectedPrefixesDesc, prometheus.GaugeValue, float64(rib.RejectedPrefixes), l...)
 		ch <- prometheus.MustNewConstMetric(activePrefixesDesc, prometheus.GaugeValue, float64(rib.ActivePrefixes), l...)
 		ch <- prometheus.MustNewConstMetric(advertisedPrefixesDesc, prometheus.GaugeValue, float64(rib.AdvertisedPrefixes), l...)
-		ch <- prometheus.MustNewConstMetric(prefixLimitCountDesc, prometheus.GaugeValue, float64(p.BGPOI.PrefixLimit.PrefixCount), l...)
 
 		prefixLimitPercent := float64(0)
 		if rib.Name == rib_name {
@@ -151,4 +149,7 @@ func (*bgpCollector) collectRIBForPeer(p BGPPeer, ch chan<- prometheus.Metric, l
 		}
 		ch <- prometheus.MustNewConstMetric(prefixLimitPercentageDesc, prometheus.GaugeValue, math.Round(prefixLimitPercent*100)/100, l...)
 	}
+
+	l := append(labelValues, rib_name)
+	ch <- prometheus.MustNewConstMetric(prefixLimitCountDesc, prometheus.GaugeValue, float64(p.BGPOI.PrefixLimit.PrefixCount), l...)
 }
